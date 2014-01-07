@@ -25,6 +25,7 @@ class District():
 	districtId = ''
 	neighbors = []
 	color = 0
+	fitness = 0
 
 	def __init__(self, districtId, neighbors, color):
 		self.districtId = str(districtId)
@@ -32,21 +33,28 @@ class District():
 		self.color = color
 
 	def getNeighbors(self):
-		return neighbors
+		return self.neighbors
 
 	def getId(self):
-		return districtId
+		return self.districtId
 
 	def getColor(self):
-		return color
+		return self.color
+
+	def setFitness(self, newFitness):
+		self.fitness = newFitness
+
+	def getFitness(self):
+		return self.fitness
 
 	def __str__(self):
-		stringRepresentation = " Id = %s, Color = %s, Neighbors = [%s] " %( self.districtId, str(self.color), ', '.join(map(str, self.neighbors)) )
+		stringRepresentation = "Id = %s, Color = %s, Neighbors = [%s] " %( self.districtId, str(self.color), ', '.join(map(str, self.neighbors)) )
 		return stringRepresentation
 
 def read_adjlist():
 	'''
 		function used to read in the input and create an adjacency list from it. 
+		returns an adjacency list constructed from the inputs
 	'''
 	# open the input file and make a dictionary of lists, where the keys are the verticies and the lists are the nodes
 	f = open('input.txt')
@@ -61,6 +69,8 @@ def initialize_population(adjacencyList):
 	'''
 		generate a random individual answer for population creation
 		you must make many of these to seed an initial population
+
+		Returns the initial randomly colored population
 	'''
 	districts = []
 	for item in adjacencyList:
@@ -71,23 +81,56 @@ def initialize_population(adjacencyList):
 	return districts
 	
 
-def fitness_function():
+def fitness_function(individual):
 	'''
-		fitness function to determine fit of individuals in the population
-		the best individuals don't have the same color as their adjacent districts according to the criteria, and the best solutions have the fewest colors
+		fitness function to determine fit of individuals in the population.
+		the best individuals don't have the same color as their adjacent districts according to the criteria, 
+		and the best solutions have the fewest colors
 	'''
-	pass
-	
+	BASEFITNESS = 10
+	matches = [individual.getColor() in dist.values() for dist in individual.neighbors]
+	numericalMatches = [int(result) for result in matches]
+	fitnessReduction = sum(numericalMatches)
+	fitness = BASEFITNESS - fitnessReduction
+
+	if DEBUG:
+		print "\n**** FITNESS FUNCTION ****"
+		print "individual: "
+		print individual
+		print "color: "
+		print individual.color
+		print "neighbor colors: "
+		for dist in individual.neighbors:
+			print dist.values()
+		print "matches: "
+		print matches
+		print "numerical representation of the matches: "
+		print numericalMatches
+		print "total reduction in fitness: "
+		print fitnessReduction
+		print "new fitness score: "
+		print fitness
+		print "**** END FITNESS FUNCTION ****\n"
 
 def crossover():
 	'''
 		crossover method for population
+		use 1 point crossover
+		Parameters
+			takes in two fit individuals
+		Returns	
+			a hybrid individual
 	'''
 	pass
 
 def mutation():
 	'''
 		mutation method for population
+		use random mutation
+		Parameters
+			takes in an individual
+		Returns
+			an individual who has a random amount of colors mutated randomly
 	'''
 	pass
 
@@ -95,15 +138,22 @@ def run_experiment():
 	'''
 		run genetic algorithm
 	'''
+	N = 10
 	adjacencyList = read_adjlist()
 	population = []
-	for i in range(100):
+	for i in range(N):
 		# generate initial population of 100 randomly colored individuals
 		population.append(initialize_population(adjacencyList))
 	
 	if DEBUG:
-		for x in population:
-			print x[0], x[1], x[2]
+		# a population consists of N individuals 
+		# each individual will have 8 adjacency lists inside of it, (one for each district)
+		# each adjacency list will have its own fitness due to color matching
+		# each individual will have a fitness based on number of colors used
+		for individual in population:
+			print individual
+
+		# fitness_function(population[0][0])
 
 	# generations 
 	n = 100
